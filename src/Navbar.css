@@ -1,0 +1,233 @@
+/* ═══════════════════════════════════════════════════════════
+   Navbar — Apple-style glassmorphism top nav
+   All classes scoped to .nb-* — existing styles untouched.
+═══════════════════════════════════════════════════════════ */
+
+/* ── Base nav bar ───────────────────────────────────────── */
+.nb-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(5, 5, 5, 0.00);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  border-bottom: 1px solid transparent;
+  transition:
+    background  0.3s ease,
+    backdrop-filter 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Glassmorphism — activates after 60px scroll */
+.nb-nav--scrolled {
+  background: rgba(5, 5, 5, 0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 1px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Logo (left) ────────────────────────────────────────── */
+.nb-logo {
+  font-family: 'Inter', 'Syne', system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+  background: linear-gradient(135deg, #fff 30%, #00D6FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Center links ───────────────────────────────────────── */
+.nb-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nb-link {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 100px;
+  transition: color 0.2s ease, background 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.nb-link:hover {
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nb-link--active {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.nb-link--active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 2px;
+  border-radius: 100px;
+  background: linear-gradient(90deg, #0050FF, #00D6FF);
+}
+
+/* ── CTA button (right) ─────────────────────────────────── */
+.nb-cta {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(10,10,12,0.9), rgba(10,10,12,0.9)) padding-box,
+    linear-gradient(135deg, #0050FF, #00D6FF) border-box;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  flex-shrink: 0;
+  box-shadow: 0 0 18px rgba(0, 80, 255, 0.20);
+  cursor: pointer;
+}
+
+.nb-cta:hover {
+  background:
+    linear-gradient(135deg, #0050FF 0%, #00D6FF 100%) padding-box,
+    linear-gradient(135deg, #0050FF, #00D6FF) border-box;
+  box-shadow: 0 0 32px rgba(0, 80, 255, 0.45), 0 0 0 3px rgba(0, 214, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+/* ── Hamburger (mobile) ─────────────────────────────────── */
+.nb-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease;
+}
+
+.nb-hamburger:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.nb-bar {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.80);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  transform-origin: center;
+}
+
+.nb-hamburger--open .nb-bar--top { transform: translateY(6.5px) rotate(45deg); }
+.nb-hamburger--open .nb-bar--mid { opacity: 0; transform: scaleX(0); }
+.nb-hamburger--open .nb-bar--bot { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ── Mobile drawer ──────────────────────────────────────── */
+.nb-drawer {
+  position: fixed;
+  top: 52px;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: rgba(5, 5, 5, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 20px 24px 28px;
+  transform: translateY(-120%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+}
+
+.nb-drawer--open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.nb-drawer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nb-drawer-link {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  display: block;
+  padding: 12px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+.nb-drawer-link:hover {
+  color: #fff;
+  padding-left: 14px;
+}
+
+.nb-drawer-cta {
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* ── Backdrop ───────────────────────────────────────────── */
+.nb-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ── Responsive: show hamburger on mobile ───────────────── */
+@media (max-width: 768px) {
+  .nb-links { display: none; }
+  .nb-cta:not(.nb-drawer-cta) { display: none; }
+  .nb-hamburger { display: flex; }
+  .nb-nav { padding: 0 20px; }
+}
