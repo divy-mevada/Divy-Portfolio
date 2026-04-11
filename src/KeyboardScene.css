@@ -112,39 +112,15 @@
   z-index: 2;
 }
 
-/* ── Beat containers ────────────────────────────────────── */
-.ks-beat {
+/* ── Single fixed bottom-left text block ────────────────── */
+.ks-text-block {
   position: absolute;
+  bottom: 60px;
+  left: 7vw;
   z-index: 10;
   pointer-events: none;
-  max-width: 600px;
-  will-change: opacity, transform;
-  /* no CSS transition — rAF handles it frame-by-frame */
-}
-
-.ks-beat--center {
-  left: 50%;
-  top: 48%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-
-.ks-beat--left {
-  left: 7vw;
-  top: 48%;
-  transform: translateY(-50%);
+  max-width: 520px;
   text-align: left;
-}
-
-.ks-beat--right {
-  right: 7vw;
-  top: 48%;
-  transform: translateY(-50%);
-  text-align: right;
-}
-
-.ks-beat--cta {
-  max-width: 700px;
 }
 
 /* ── Headings (Syne — matches Home / About section headings) */
@@ -155,25 +131,28 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gold, #c9a84c);
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   opacity: 0.85;
+  animation: ksCrossfade 0.5s ease both;
 }
 
 .ks-head {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(40px, 5.2vw, 74px);
+  font-size: clamp(30px, 3.8vw, 54px);
   font-weight: 800;
-  line-height: 1.02;
+  line-height: 1.05;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--text, #f0ece4) 45%, var(--gold-light, #e8c96a));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+  animation: ksCrossfade 0.5s ease both;
 }
 
-.ks-head--xl {
-  font-size: clamp(44px, 5.8vw, 80px);
+@keyframes ksCrossfade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
 
 .ks-sub {
@@ -192,11 +171,12 @@
 
 .ks-body {
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(14px, 1.4vw, 16px);
+  font-size: clamp(13px, 1.3vw, 15px);
   font-weight: 400;
   line-height: 1.8;
   color: var(--text-muted, rgba(240, 236, 228, 0.50));
   margin-bottom: 10px;
+  animation: ksCrossfade 0.5s ease 0.08s both;
 }
 
 .ks-body--muted {
@@ -285,4 +265,24 @@
   .ks-beat--right  { right: 5vw; max-width: 88vw; text-align: left; }
   .ks-list li      { justify-content: flex-start; }
   .ks-head         { font-size: clamp(34px, 9vw, 54px); }
+}
+
+/* ── Scroll progress bar (bottom of sticky panel) ───────── */
+.ks-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(201, 168, 76, 0.10);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.ks-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold, #c9a84c), var(--gold-light, #e8c96a));
+  box-shadow: 0 0 8px rgba(201, 168, 76, 0.5);
+  transition: width 80ms linear;
+  border-radius: 0 2px 2px 0;
 }

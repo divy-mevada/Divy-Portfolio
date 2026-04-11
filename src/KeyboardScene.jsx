@@ -1,48 +1,61 @@
 import { useEffect, useRef, useState } from 'react';
 import './KeyboardScene.css';
 
-/* ─── Beat definitions (video-time % ranges) ────────────────
-   Beats are keyed to video.currentTime / video.duration (0→1)
-   so they're entirely independent of scroll — the video plays
-   at natural speed, text just follows the playhead.
-──────────────────────────────────────────────────────────── */
-const BEATS = [
-  { from: 0,    to: 0.22, pos: 'center' },
-  { from: 0.22, to: 0.46, pos: 'left'   },
-  { from: 0.46, to: 0.70, pos: 'right'  },
-  { from: 0.70, to: 0.88, pos: 'center' },
-  { from: 0.88, to: 1.00, pos: 'center' },
+/* ─── Config ─────────────────────────────────────────────── */
+const MAX_VIDEO_TIME = 6; // stop video at 6 seconds
+
+/* ─── 3 text stages, keyed to video progress (0 → 1) ────── */
+const STAGES = [
+  {
+    eyebrow: 'Welcome',
+    headline: 'Divy Mevada',
+    body: 'Developer.  Designer.  Builder.\nCrafting experiences at the intersection\nof design and engineering.',
+  },
+  {
+    eyebrow: 'Philosophy',
+    headline: 'Built with\nprecision.',
+    body: 'Every project engineered for performance,\nclarity, and purposeful interaction.',
+  },
+  {
+    eyebrow: "Let's connect",
+    headline: 'Open to\nopportunities.',
+    body: 'Collaborations, full-stack projects,\nand bold ideas — let\'s build something real.',
+  },
 ];
 
-const FADE = 0.05; // fraction of duration for fade in/out
-
-function opacityAt(beat, p) {
-  if (p < beat.from || p > beat.to) return 0;
-  return Math.min(
-    (p - beat.from)  / FADE,
-    (beat.to - p)    / FADE,
-    1
-  );
-}
-
 export default function KeyboardScene() {
-  const videoRef    = useRef(null);
-  const outerRef    = useRef(null);
-  const rafRef      = useRef(null);
-  const [beats, setBeats]           = useState([0, 0, 0, 0, 0]);
-  const [hintOpacity, setHintOpacity] = useState(1);
+  const outerRef      = useRef(null);
+  const videoRef      = useRef(null);
+  const rafRef        = useRef(null);
+  const playingRef    = useRef(false);
 
-  /* ── Scroll hint fades as intro scrolls away ── */
+  const [stageIdx,      setStageIdx]      = useState(0);
+  const [hintOpacity,   setHintOpacity]   = useState(1);
+  const [panelOpacity,  setPanelOpacity]  = useState(1);
+  const [completed,     setCompleted]     = useState(false);
+
+  /* ── Intro hint fades as user scrolls away from intro ── */
   useEffect(() => {
-    const onScroll = () => {
-      const ratio = Math.max(0, 1 - window.scrollY / window.innerHeight);
-      setHintOpacity(ratio);
-    };
+    const onScroll = () =>
+      setHintOpacity(Math.max(0, 1 - window.scrollY / window.innerHeight));
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* ── Video + beat sync ── */
+  /* ── On video complete → fade panel → scroll to portfolio ── */
+  useEffect(() => {
+    if (!completed) return;
+    setPanelOpacity(0);
+    const t = setTimeout(() => {
+      if (outerRef.current) {
+        const end = outerRef.current.offsetTop + outerRef.current.offsetHeight;
+        window.scrollTo({ top: end, behavior: 'smooth' });
+      }
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [completed]);
+
+  /* ── Core: video autoplay + stage tracking ── */
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -51,59 +64,62 @@ export default function KeyboardScene() {
     video.preload     = 'auto';
     video.playsInline = true;
 
-    /* rAF: read video.currentTime every frame → drive beat opacities */
+    /* rAF: cap at MAX_VIDEO_TIME, update stage, detect end */
     const tick = () => {
       if (video.duration) {
-        const p = video.currentTime / video.duration;
-        setBeats(BEATS.map(b => opacityAt(b, p)));
+        // Hard-stop at 6 seconds
+        if (video.currentTime >= MAX_VIDEO_TIME) {
+          video.pause();
+          video.currentTime = MAX_VIDEO_TIME;
+          setCompleted(true);
+        }
+
+        // Update text stage based on playback progress
+        const p = video.currentTime / MAX_VIDEO_TIME;
+        const idx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
+        setStageIdx(idx);
       }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
 
-    /* ── Play/pause helpers ── */
-    let isPlaying = false;
-
-    const tryPlay = () => {
-      if (!isPlaying) {
-        isPlaying = true;
-        video.play().catch(() => { isPlaying = false; });
+    /* ─── Play/pause helpers ─────────────────────────────── */
+    const play = () => {
+      if (!playingRef.current && video.currentTime < MAX_VIDEO_TIME) {
+        playingRef.current = true;
+        video.currentTime  = 0;
+        video.play().catch(() => { playingRef.current = false; });
       }
     };
-
-    const tryPause = () => {
-      if (isPlaying) {
-        isPlaying = false;
+    const pause = () => {
+      if (playingRef.current) {
+        playingRef.current = false;
         video.pause();
       }
     };
 
-    /* ── IntersectionObserver: fires as soon as 1px of outer div is visible.
-       threshold: 0  ← the outer div is 200vh; 0.55 is mathematically
-       unreachable in a 100vh viewport (max ratio = 100/200 = 0.5).     ── */
+    /* ─── IntersectionObserver ───────────────────────────────
+       threshold: 0  →  fires the moment any pixel of the
+       200vh outer div enters the viewport.
+       (The old bug was threshold: 0.55 on 200vh = impossible.)
+    ──────────────────────────────────────────────────────── */
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          video.currentTime = 0;
-          tryPlay();
-        } else {
-          tryPause();
-        }
+        if (entry.isIntersecting) play();
+        else pause();
       },
-      { threshold: 0 }           // ← was 0.55 — that was the bug
+      { threshold: 0 }
     );
     if (outerRef.current) io.observe(outerRef.current);
 
-    /* ── Scroll fallback: if observer missed the entry, play while sticky ── */
+    /* ─── Scroll fallback ────────────────────────────────────
+       Handles trackpad / scrollbar edge cases where the
+       observer fires but .play() is blocked initially.
+    ──────────────────────────────────────────────────────── */
     const onScroll = () => {
       if (!outerRef.current) return;
       const { top, bottom } = outerRef.current.getBoundingClientRect();
-      const inStickyZone = top <= 0 && bottom > 0;
-      if (inStickyZone) {
-        tryPlay();
-      } else if (bottom <= 0) {
-        tryPause();
-      }
+      if (top < window.innerHeight && bottom > 0) play();
     };
     window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -114,12 +130,14 @@ export default function KeyboardScene() {
     };
   }, []);
 
+  const stage = STAGES[stageIdx];
+
   return (
     <>
-      {/* ════════════════════════════════════════════════════
+      {/* ══════════════════════════════════════════════════════
           PHASE 1 — Black intro screen (100 vh)
-          User sees this first; scroll hint invites them in.
-      ════════════════════════════════════════════════════ */}
+          User sees this on load; one scroll → keyboard view.
+      ══════════════════════════════════════════════════════ */}
       <div className="ks-intro">
         <p className="ks-intro-title">Divy Mevada</p>
         <div className="ks-intro-hint" style={{ opacity: hintOpacity }}>
@@ -128,13 +146,20 @@ export default function KeyboardScene() {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════════════════
-          PHASE 2 — Keyboard video panel (sticky, 200 vh outer)
-          Video autoplays when in viewport; beats sync to time.
-      ════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════
+          PHASE 2 — Keyboard video (sticky, 200 vh outer)
+          Video autoplays on intersection; one scroll triggers it.
+          After 6 s, panel fades and page scrolls to portfolio.
+      ══════════════════════════════════════════════════════ */}
       <div className="ks-outer" ref={outerRef}>
-        <div className="ks-sticky">
-
+        <div
+          className="ks-sticky"
+          style={{
+            opacity: panelOpacity,
+            transition: 'opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
+            pointerEvents: completed ? 'none' : 'auto',
+          }}
+        >
           <video
             ref={videoRef}
             className="ks-video"
@@ -145,69 +170,32 @@ export default function KeyboardScene() {
           />
           <div className="ks-vignette" />
 
-          {/* ── BEAT 1 — Welcome (0–22%) ── */}
-          <div className="ks-beat ks-beat--center"
-            style={{ opacity: beats[0], transform: `translateY(${(1 - beats[0]) * 22}px)` }}>
-            <p className="ks-eyebrow">Welcome</p>
-            <h1 className="ks-head">Divy Mevada</h1>
-            <p className="ks-sub">Developer.&nbsp;&nbsp;Designer.&nbsp;&nbsp;Builder.</p>
-            <p className="ks-body">
-              Crafting experiences that live at the intersection<br />
-              of design and engineering.
+          {/* Single bottom-left text block — content crossfades between stages */}
+          <div className="ks-text-block">
+            <p className="ks-eyebrow" key={`ey-${stageIdx}`}>{stage.eyebrow}</p>
+            <h2 className="ks-head" key={`hd-${stageIdx}`}>
+              {stage.headline.split('\n').map((line, i) => (
+                <span key={i}>{line}{i < stage.headline.split('\n').length - 1 && <br />}</span>
+              ))}
+            </h2>
+            <p className="ks-body" key={`bd-${stageIdx}`}>
+              {stage.body.split('\n').map((line, i) => (
+                <span key={i}>{line}{i < stage.body.split('\n').length - 1 && <br />}</span>
+              ))}
             </p>
           </div>
 
-          {/* ── BEAT 2 — Precision (22–46%) ── */}
-          <div className="ks-beat ks-beat--left"
-            style={{ opacity: beats[1], transform: `translateY(${(1 - beats[1]) * 22}px)` }}>
-            <p className="ks-eyebrow">Philosophy</p>
-            <h2 className="ks-head">Built with<br />precision.</h2>
-            <p className="ks-body">
-              Every project is engineered for performance,<br />
-              clarity, and purposeful interaction.
-            </p>
-            <p className="ks-body ks-body--muted">
-              From concept to deployment — clean code,<br />
-              thoughtful architecture, real results.
-            </p>
+          {/* Thin gold progress bar at bottom */}
+          <div className="ks-progress-track">
+            <div
+              className="ks-progress-fill"
+              style={{
+                width: videoRef.current?.duration
+                  ? `${Math.min(videoRef.current.currentTime / MAX_VIDEO_TIME, 1) * 100}%`
+                  : '0%'
+              }}
+            />
           </div>
-
-          {/* ── BEAT 3 — Interaction (46–70%) ── */}
-          <div className="ks-beat ks-beat--right"
-            style={{ opacity: beats[2], transform: `translateY(${(1 - beats[2]) * 22}px)` }}>
-            <p className="ks-eyebrow">Craft</p>
-            <h2 className="ks-head">Interaction,<br />redefined.</h2>
-            <ul className="ks-list">
-              <li>Scroll-driven storytelling and motion design.</li>
-              <li>Interfaces that feel as good as they look.</li>
-              <li>UI/UX grounded in real user behavior.</li>
-            </ul>
-          </div>
-
-          {/* ── BEAT 4 — Portfolio (70–88%) ── */}
-          <div className="ks-beat ks-beat--center"
-            style={{ opacity: beats[3], transform: `translateY(${(1 - beats[3]) * 22}px)` }}>
-            <p className="ks-eyebrow">Portfolio</p>
-            <h2 className="ks-head">Projects that<br />speak for themselves.</h2>
-            <p className="ks-body">
-              From full-stack apps to creative frontends —<br />
-              a portfolio built for impact.
-            </p>
-          </div>
-
-          {/* ── BEAT 5 — CTA (88–100%) ── */}
-          <div className="ks-beat ks-beat--center ks-beat--cta"
-            style={{ opacity: beats[4], transform: `translateY(${(1 - beats[4]) * 22}px)` }}>
-            <h2 className="ks-head ks-head--xl">Let's build something<br />exceptional.</h2>
-            <p className="ks-sub ks-sub--sm">
-              Open to opportunities, collaborations, and bold ideas.
-            </p>
-            <div className="ks-cta-row">
-              <a href="#s-experience" className="ks-btn ks-btn--gold">View My Work</a>
-              <a href="#s-home"       className="ks-btn ks-btn--ghost">Get in Touch</a>
-            </div>
-          </div>
-
         </div>
       </div>
     </>
