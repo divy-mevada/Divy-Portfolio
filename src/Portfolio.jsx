@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import './portfolio.css';
 import KeyboardScene from './KeyboardScene';
 
 const SECTIONS = [
   { id: 's-home', label: 'Home', icon: '⌂' },
   { id: 's-summary', label: 'About', icon: '◎' },
-  { id: 's-experience', label: 'Projects', icon: '◈' },
+  { id: 's-experience-new', label: 'Experience', icon: '⌚' },
+  { id: 's-projects', label: 'Projects', icon: '◈' },
   { id: 's-skills', label: 'Skills', icon: '⟨/⟩' },
   { id: 's-achievements', label: 'Awards', icon: '★' },
+  { id: 's-contact', label: 'Contact', icon: '✉' },
 ];
 
 export default function Portfolio() {
@@ -86,6 +89,24 @@ export default function Portfolio() {
   }, []);
 
 
+
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSending(true);
+    emailjs.send(
+      'YOUR_SERVICE_ID',
+      'YOUR_TEMPLATE_ID',
+      { from_name: form.name, from_email: form.email, message: form.message, to_email: 'divymevada.work@gmail.com' },
+      'YOUR_PUBLIC_KEY'
+    ).then(() => {
+      setSent(true);
+      setForm({ name: '', email: '', message: '' });
+    }).catch(() => alert('Failed to send. Please try again.')).finally(() => setSending(false));
+  };
 
   const handleNav = (id) => {
     const el = sectionRefs.current[id];
@@ -208,11 +229,61 @@ export default function Portfolio() {
           </div>
         </div>
 
+        {/* EXPERIENCE */}
+        <div
+          className="section"
+          id="s-experience-new"
+          ref={(el) => (sectionRefs.current['s-experience-new'] = el)}
+        >
+          <div className="glass projects-intro">
+            <div className="section-label">Career Journey</div>
+            <div className="section-title">Experience &amp; <span className="highlight">Achievements</span></div>
+          </div>
+          <div className="timeline">
+            {[
+              {
+                role: 'Lead Developer',
+                organization: 'Tech Innovation Lab',
+                period: '2023 - Present',
+                description: 'Spearheading the development of next-gen AI applications and managing a team of 5 developers.',
+                type: 'Leadership'
+              },
+              {
+                role: 'Hackathon Winner',
+                organization: 'Global AI Summit',
+                period: '2024',
+                description: 'Awarded first place for developing a decentralized identity solution using blockchain technology.',
+                type: 'Achievement'
+              },
+              {
+                role: 'Open Source Contributor',
+                organization: 'React Community',
+                period: '2022 - 2023',
+                description: 'Contributed to several popular React libraries, improving performance and developer experience.',
+                type: 'Experience'
+              }
+            ].map((exp, index) => (
+              <div key={index} className="timeline-item">
+                <div className="timeline-dot"></div>
+                <div className="timeline-content glass">
+                  <div className="exp-header">
+                    <span className="exp-type">{exp.type}</span>
+                    <span className="exp-period">{exp.period}</span>
+                  </div>
+                  <h3 className="exp-role">{exp.role}</h3>
+                  <h4 className="exp-org">{exp.organization}</h4>
+                  <p className="exp-desc">{exp.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* PROJECTS */}
         <div
           className="section"
-          id="s-experience"
-          ref={(el) => (sectionRefs.current['s-experience'] = el)}
+          id="s-projects"
+          ref={(el) => (sectionRefs.current['s-projects'] = el)}
         >
           <div className="glass projects-intro">
             <div className="section-label">Featured Work</div>
@@ -386,7 +457,94 @@ export default function Portfolio() {
           </div>
         </div>
 
+        {/* CONTACT */}
+        <div
+          className="section"
+          id="s-contact"
+          ref={(el) => (sectionRefs.current['s-contact'] = el)}
+        >
+          <div className="glass contact-card">
+            <div className="section-label">Get In Touch</div>
+            <div className="section-title">Let's <span className="highlight">Connect</span></div>
+            <p className="contact-subtitle">Have a project in mind or just want to say hi? My inbox is always open.</p>
+            
+            <div className="contact-grid">
+              <div className="contact-info">
+                <div className="info-item">
+                  <span className="info-icon">✉️</span>
+                  <div>
+                    <h4>Email</h4>
+                    <p>divymevada.work@gmail.com</p>
+                  </div>
+                </div>
+                <div className="info-item">
+                  <span className="info-icon">📍</span>
+                  <div>
+                    <h4>Location</h4>
+                    <p>Ahmedabad, IN</p>
+                  </div>
+                </div>
+                <div className="social-links">
+                  <a href="https://linkedin.com" className="social-icon">in</a>
+                  <a href="https://github.com" className="social-icon">gh</a>
+                  <a href="#" className="social-icon">tw</a>
+                </div>
+              </div>
+              
+              <form className="contact-form" onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <input type="text" placeholder="Your Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <input type="email" placeholder="Your Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <textarea placeholder="Your Message" rows="5" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required></textarea>
+                </div>
+                <button type="submit" className="btn-primary w-full" disabled={sending}>
+                  {sending ? 'Sending...' : sent ? '✓ Message Sent!' : 'Send Message'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
       </div>
+
+      {/* FOOTER */}
+      <footer className="footer-container">
+        <div className="wrapper" style={{ padding: '0 32px' }}>
+          <div className="footer-content">
+            <div className="footer-brand">
+              <div className="logo">Divy Mevada</div>
+              <p className="footer-tagline">Building the future, one commit at a time.</p>
+            </div>
+            <div className="footer-links">
+              <div className="link-group">
+                <h4>Navigation</h4>
+                <button onClick={() => handleNav('s-home')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>Home</button><br/>
+                <button onClick={() => handleNav('s-summary')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>About</button><br/>
+                <button onClick={() => handleNav('s-skills')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>Skills</button><br/>
+                <button onClick={() => handleNav('s-projects')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>Projects</button>
+              </div>
+              <div className="link-group">
+                <h4>Social</h4>
+                <a href="#">LinkedIn</a>
+                <a href="#">GitHub</a>
+                <a href="#">Twitter</a>
+                <a href="#">Instagram</a>
+              </div>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <p>&copy; {new Date().getFullYear()} Divy Mevada. All rights reserved.</p>
+            <div className="footer-legal">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* NAV */}
       <nav className={`nav-bar${showNav ? ' nav-visible' : ''}`}>
