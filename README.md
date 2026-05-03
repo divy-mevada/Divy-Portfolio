@@ -2,8 +2,6 @@
 
 Welcome to the repository of my professional portfolio. This is a high-performance, visually stunning web application built to showcase my work in **Full-Stack Development**, **AI/ML**, and **Web3/Blockchain**.
 
-![Portfolio Preview](/public/hero.png) *(Replace with actual screenshot after deployment)*
-
 ## ✨ Key Features
 
 - **Cinematic Experience**: A custom 3D-style keyboard animation scene built with CSS and React logic.
@@ -20,53 +18,6 @@ Welcome to the repository of my professional portfolio. This is a high-performan
 - **Styling**: Vanilla CSS (Custom Glassmorphism System)
 - **Forms**: [EmailJS](https://www.emailjs.com/)
 - **Animations**: CSS3 Transitions & Intersection Observer API
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/divy-mevada/portfolio.git
-   cd portfolio
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup:**
-   Create a `.env` file in the root directory and add your EmailJS keys:
-   ```env
-   VITE_EMAILJS_SERVICE_ID=your_service_id
-   VITE_EMAILJS_TEMPLATE_ID=your_template_id
-   VITE_EMAILJS_PUBLIC_KEY=your_public_key
-   ```
-
-4. **Run locally:**
-   ```bash
-   npm run dev
-   ```
-
-## 📂 Project Structure
-
-```text
-├── src/
-│   ├── assets/           # Images and static assets
-│   ├── KeyboardScene/    # 3D intro animation components
-│   ├── Navbar/           # Responsive navigation logic
-│   ├── App.jsx           # Main entry point
-│   ├── Portfolio.jsx     # Core portfolio layout and sections
-│   └── portfolio.css     # Global design system & glassmorphism
-├── public/               # Static files (Resume, Favicon, Video)
-└── index.html            # SEO & Metadata
-```
 
 ## 🏆 Featured Projects
 
