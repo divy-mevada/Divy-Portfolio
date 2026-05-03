@@ -730,6 +730,45 @@ body {
   font-size: 13px;
   font-weight: 600;
   color: var(--gold-light);
+  margin-bottom: 20px;
+}
+
+.project-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-btn span {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.action-btn:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #080b0f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.3);
+}
+
+.action-btn:hover span {
+  opacity: 1;
 }
 
 /* ACHIEVEMENTS */

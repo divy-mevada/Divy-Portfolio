@@ -71,7 +71,7 @@ export default function Portfolio() {
 
     document.querySelectorAll('.glass').forEach((el, i) => {
       // Home section cards pop from behind the keyboard; About section also pops nicely
-      const inHome  = !!el.closest('#s-home');
+      const inHome = !!el.closest('#s-home');
       const inAbout = !!el.closest('#s-summary');
       el.style.opacity = '0';
 
@@ -98,10 +98,15 @@ export default function Portfolio() {
     e.preventDefault();
     setSending(true);
     emailjs.send(
-      'YOUR_SERVICE_ID',
-      'YOUR_TEMPLATE_ID',
-      { from_name: form.name, from_email: form.email, message: form.message, to_email: 'divymevada.work@gmail.com' },
-      'YOUR_PUBLIC_KEY'
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      { 
+        from_name: form.name, 
+        from_email: form.email, 
+        message: form.message, 
+        to_email: 'divymevada.work@gmail.com' 
+      },
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
     ).then(() => {
       setSent(true);
       setForm({ name: '', email: '', message: '' });
@@ -133,20 +138,20 @@ export default function Portfolio() {
         >
           <div className="glass hero-card">
             <div className="hero-glow"></div>
-            <button className="download-btn">↓ Download CV</button>
+            <a href="https://drive.google.com/file/d/1dpzh3uJmrf1zaOSKVrzfgSyUknuHWB85/view?usp=sharing" className="download-btn" target="_blank" rel="noopener noreferrer">↓ Resume</a>
             <div className="hero-content">
               <div className="status-badge">
                 <div className="status-dot"></div>
                 Open to Work
               </div>
-              <div className="hero-role">Computer Science Engineer · Full-Stack · AI</div>
+              <div className="hero-role">Software Engineer · Full-Stack · AI/ML  & Web3 Developer </div>
               <div className="hero-name">Divy<br />Mevada</div>
               <p className="hero-desc">
                 Building blockchain systems, AI platforms &amp; smart-city analytics. Hackathon winner. Deep problem solver. Currently at Nirma University, shaping ideas into products.
               </p>
               <div className="hero-contacts">
-                <a href="https://linkedin.com" className="contact-item">in LinkedIn</a>
-                <a href="https://github.com" className="contact-item">⌥ GitHub</a>
+                <a href="https://www.linkedin.com/in/divy-mevada-4230332bb/" target="_blank" rel="noopener noreferrer" className="contact-item">in LinkedIn</a>
+                <a href="https://github.com/divy-mevada" target="_blank" rel="noopener noreferrer" className="contact-item">⌥ GitHub</a>
                 <span className="contact-item">◎ Ahmedabad, IN</span>
               </div>
             </div>
@@ -160,16 +165,16 @@ export default function Portfolio() {
 
           <div className="stats-row">
             <div className="glass stat-card">
+              <div className="stat-num">2+</div>
+              <div className="stat-label">Years of experience</div>
+            </div>
+            <div className="glass stat-card">
+              <div className="stat-num">10+</div>
+              <div className="stat-label">Real-world projects</div>
+            </div>
+            <div className="glass stat-card">
               <div className="stat-num">3+</div>
               <div className="stat-label">Hackathon Awards</div>
-            </div>
-            <div className="glass stat-card">
-              <div className="stat-num">150+</div>
-              <div className="stat-label">Problems Solved</div>
-            </div>
-            <div className="glass stat-card">
-              <div className="stat-num">8.7</div>
-              <div className="stat-label">CGPA / 10.0</div>
             </div>
           </div>
         </div>
@@ -198,8 +203,8 @@ export default function Portfolio() {
             <div className="glass edu-card">
               <div className="section-label">Education</div>
               <div className="edu-school">Nirma University</div>
-              <div className="edu-degree">B.Tech — Computer Science &amp; Engineering<br />Ahmedabad, Gujarat · Expected May 2028</div>
-              <div className="edu-badge">⭐ CGPA: 8.7 / 10.0</div>
+              <div className="edu-degree">B.Tech — Computer Science &amp; Engineering<br />Ahmedabad, Gujarat · May 2028</div>
+              <div className="edu-badge">CGPA: 8.7 / 10.0</div>
               <div style={{ marginTop: '20px' }}>
                 <div className="section-label" style={{ marginTop: '4px' }}>Coursework</div>
                 <div className="tag-grid">
@@ -224,6 +229,8 @@ export default function Portfolio() {
                 <span className="tag">Competitive Programming</span>
                 <span className="tag">Smart Cities</span>
                 <span className="tag">Open Source</span>
+                <span className="tag">Agentic AI</span>
+                <span className="tag">AI Agents</span>
               </div>
             </div>
           </div>
@@ -242,25 +249,25 @@ export default function Portfolio() {
           <div className="timeline">
             {[
               {
-                role: 'Lead Developer',
-                organization: 'Tech Innovation Lab',
+                role: '2nd Runner-Up',
+                organization: 'National Hackathon · IIT Gandhinagar',
+                period: '2024',
+                description: 'Developed DHRUVA, a blockchain-based credential verification system. Won ₹30,000 and competed against top talent nationwide.',
+                type: 'Award'
+              },
+              {
+                role: 'Executive Member',
+                organization: 'CSI Nirma University',
                 period: '2023 - Present',
-                description: 'Spearheading the development of next-gen AI applications and managing a team of 5 developers.',
+                description: 'Organizing workshops, technical sessions, and hackathons for the student community at Nirma University.',
                 type: 'Leadership'
               },
               {
-                role: 'Hackathon Winner',
-                organization: 'Global AI Summit',
+                role: 'Top 10 Finalist',
+                organization: 'Ingenious 7.0 Hackathon',
                 period: '2024',
-                description: 'Awarded first place for developing a decentralized identity solution using blockchain technology.',
+                description: 'Built a smart-city analytics platform (City View) and ranked in the top 10 out of 120+ teams.',
                 type: 'Achievement'
-              },
-              {
-                role: 'Open Source Contributor',
-                organization: 'React Community',
-                period: '2022 - 2023',
-                description: 'Contributed to several popular React libraries, improving performance and developer experience.',
-                type: 'Experience'
               }
             ].map((exp, index) => (
               <div key={index} className="timeline-item">
@@ -294,7 +301,7 @@ export default function Portfolio() {
             <div className="glass project-card">
               <div className="project-header">
                 <div className="project-number">01 — NATIONAL HACKATHON · IIT GANDHINAGAR</div>
-                <div className="project-badge">🥉 2nd Runner-Up</div>
+                <div className="project-badge">2nd Runner-Up</div>
               </div>
               <div className="project-title">DHRUVA</div>
               <div className="project-sub">Blockchain Credential Verification Platform</div>
@@ -303,7 +310,15 @@ export default function Portfolio() {
                 <li>Implemented secure credential storage with QR-based credential sharing for seamless identity management.</li>
                 <li>Designed an intuitive UI abstracting blockchain complexity for non-technical users.</li>
               </ul>
-              <div className="project-achievement">🏆 ₹30,000 Prize — Competed nationally</div>
+              <div className="project-achievement">₹30,000 Prize — Competed nationally</div>
+              <div className="project-actions">
+                <a href="https://github.com/divy-mevada/DHRUVA_" target="_blank" rel="noopener noreferrer" className="action-btn">
+                  <span>⌥</span> GitHub
+                </a>
+                <a href="https://dhruva-8.netlify.app/" target="_blank" rel="noopener noreferrer" className="action-btn">
+                  <span>◎</span> Live Demo
+                </a>
+              </div>
             </div>
 
             <div className="glass project-card">
@@ -318,7 +333,12 @@ export default function Portfolio() {
                 <li>Built real-time dashboards enabling data-driven urban planning for civic administrators.</li>
                 <li>Processed live sensor streams and presented actionable visualizations for city-scale decisions.</li>
               </ul>
-              <div className="project-achievement">📍 Top 10 among 120+ competing teams</div>
+              <div className="project-achievement">Top 10 among 120+ competing teams</div>
+              <div className="project-actions">
+                <a href="https://github.com/divy-mevada/Delighful_Derek" target="_blank" rel="noopener noreferrer" className="action-btn">
+                  <span>⌥</span> GitHub
+                </a>
+              </div>
             </div>
 
             <div className="glass project-card">
@@ -333,7 +353,15 @@ export default function Portfolio() {
                 <li>Designed dashboards for ESG evaluation, risk detection, and compliance tracking across sectors.</li>
                 <li>Qualified for offline finals from a pool of 700+ competing teams nationwide.</li>
               </ul>
-              <div className="project-achievement">🌍 Qualified Offline Finals — 700+ teams</div>
+              <div className="project-achievement">Qualified Offline Finals — 700+ teams</div>
+              <div className="project-actions">
+                <a href="https://github.com/divy-mevada/ESGresolve" target="_blank" rel="noopener noreferrer" className="action-btn">
+                  <span>⌥</span> GitHub
+                </a>
+                <a href="https://esg-resolve-067.vercel.app/" target="_blank" rel="noopener noreferrer" className="action-btn">
+                  <span>◎</span> Live Demo
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -351,8 +379,8 @@ export default function Portfolio() {
                 { name: 'Python', pct: 90 },
                 { name: 'JavaScript / TypeScript', pct: 85 },
                 { name: 'C++', pct: 80 },
-                { name: 'Java', pct: 75 },
-                { name: 'Dart / Go / SQL', pct: 65 },
+                { name: 'SQL', pct: 75 },
+                { name: 'Java', pct: 65 },
               ].map((s) => (
                 <div className="skill-item" key={s.name}>
                   <div className="skill-header">
@@ -371,9 +399,7 @@ export default function Portfolio() {
               {[
                 { name: 'React.js / Next.js', pct: 88 },
                 { name: 'Node.js / Express.js', pct: 82 },
-                { name: 'Flutter', pct: 75 },
                 { name: 'TensorFlow / Flask', pct: 70 },
-                { name: 'Spring Boot', pct: 62 },
               ].map((s) => (
                 <div className="skill-item" key={s.name}>
                   <div className="skill-header">
@@ -467,7 +493,7 @@ export default function Portfolio() {
             <div className="section-label">Get In Touch</div>
             <div className="section-title">Let's <span className="highlight">Connect</span></div>
             <p className="contact-subtitle">Have a project in mind or just want to say hi? My inbox is always open.</p>
-            
+
             <div className="contact-grid">
               <div className="contact-info">
                 <div className="info-item">
@@ -485,12 +511,11 @@ export default function Portfolio() {
                   </div>
                 </div>
                 <div className="social-links">
-                  <a href="https://linkedin.com" className="social-icon">in</a>
-                  <a href="https://github.com" className="social-icon">gh</a>
-                  <a href="#" className="social-icon">tw</a>
+                  <a href="https://www.linkedin.com/in/divy-mevada-4230332bb/" target="_blank" rel="noopener noreferrer" className="social-icon">in</a>
+                  <a href="https://github.com/divy-mevada" target="_blank" rel="noopener noreferrer" className="social-icon">gh</a>
                 </div>
               </div>
-              
+
               <form className="contact-form" onSubmit={handleSubmit}>
                 <div className="form-group">
                   <input type="text" placeholder="Your Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -522,17 +547,15 @@ export default function Portfolio() {
             <div className="footer-links">
               <div className="link-group">
                 <h4>Navigation</h4>
-                <button onClick={() => handleNav('s-home')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>Home</button><br/>
-                <button onClick={() => handleNav('s-summary')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>About</button><br/>
-                <button onClick={() => handleNav('s-skills')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>Skills</button><br/>
-                <button onClick={() => handleNav('s-projects')} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0}}>Projects</button>
+                <button onClick={() => handleNav('s-home')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0 }}>Home</button><br />
+                <button onClick={() => handleNav('s-summary')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0 }}>About</button><br />
+                <button onClick={() => handleNav('s-skills')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0 }}>Skills</button><br />
+                <button onClick={() => handleNav('s-projects')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: '12px', fontSize: '14px', fontFamily: 'inherit', textAlign: 'left', padding: 0 }}>Projects</button>
               </div>
               <div className="link-group">
                 <h4>Social</h4>
-                <a href="#">LinkedIn</a>
-                <a href="#">GitHub</a>
-                <a href="#">Twitter</a>
-                <a href="#">Instagram</a>
+                <a href="https://www.linkedin.com/in/divy-mevada-4230332bb/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="https://github.com/divy-mevada" target="_blank" rel="noopener noreferrer">GitHub</a>
               </div>
             </div>
           </div>

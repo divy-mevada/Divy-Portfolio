@@ -123,6 +123,45 @@
   text-align: left;
 }
 
+/* ── Centered Minimal Text (Completed State) ──────────── */
+.ks-centered-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.ks-centered-text {
+  text-align: center;
+  width: 90%;
+  max-width: 600px;
+}
+
+.ks-minimal-greet {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(34px, 5.5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text, #f0ece4) 40%, var(--gold-light, #e8c96a));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+
+.ks-minimal-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(13px, 1.4vw, 15px);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted, rgba(240, 236, 228, 0.45));
+}
+
 /* ── Headings (Syne — matches Home / About section headings) */
 .ks-eyebrow {
   font-family: 'DM Sans', sans-serif;
@@ -153,6 +192,10 @@
 @keyframes ksCrossfade {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0);    }
+}
+
+.ks-fade-in {
+  animation: ksCrossfade 0.8s ease forwards;
 }
 
 .ks-sub {
@@ -210,13 +253,14 @@
   flex-shrink: 0;
 }
 
-/* ── CTA buttons (beat 5) ───────────────────────────────── */
+/* ── CTA buttons ───────────────────────────────────────── */
 .ks-cta-row {
   display: flex;
   gap: 14px;
   justify-content: center;
   flex-wrap: wrap;
   pointer-events: all;
+  margin-top: 10px;
 }
 
 .ks-btn {

@@ -21,6 +21,11 @@ const STAGES = [
     headline: 'Open to\nopportunities.',
     body: 'Collaborations, full-stack projects,\nand bold ideas — let\'s build something real.',
   },
+  {
+    eyebrow: "Explore More",
+    headline: "Ready to\nexplore?",
+    body: "Scroll down to see my full portfolio, projects, and skills. Or replay the intro to see it again.",
+  },
 ];
 
 export default function KeyboardScene() {
@@ -45,7 +50,7 @@ export default function KeyboardScene() {
   /* ── On video complete → fade panel → scroll to portfolio ── */
   useEffect(() => {
     if (!completed) return;
-    setPanelOpacity(0);
+    // Removed setPanelOpacity(0) to keep video visible
     const t = setTimeout(() => {
       if (outerRef.current) {
         const end = outerRef.current.offsetTop + outerRef.current.offsetHeight;
@@ -72,12 +77,13 @@ export default function KeyboardScene() {
           video.pause();
           video.currentTime = MAX_VIDEO_TIME;
           setCompleted(true);
+          setStageIdx(3); // Final stage
+        } else {
+          // Update text stage based on playback progress
+          const p = video.currentTime / MAX_VIDEO_TIME;
+          const idx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
+          setStageIdx(idx);
         }
-
-        // Update text stage based on playback progress
-        const p = video.currentTime / MAX_VIDEO_TIME;
-        const idx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
-        setStageIdx(idx);
       }
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -87,7 +93,7 @@ export default function KeyboardScene() {
     const play = () => {
       if (!playingRef.current && video.currentTime < MAX_VIDEO_TIME) {
         playingRef.current = true;
-        video.currentTime  = 0;
+        // video.currentTime = 0; // Removed to allow resume if needed, though we stop at 6s anyway
         video.play().catch(() => { playingRef.current = false; });
       }
     };
@@ -97,6 +103,16 @@ export default function KeyboardScene() {
         video.pause();
       }
     };
+
+    const replay = () => {
+      video.currentTime = 0;
+      setCompleted(false);
+      setStageIdx(0);
+      playingRef.current = true;
+      video.play().catch(() => { playingRef.current = false; });
+    };
+
+    window.__replayVideo = replay; // Expose for the button
 
     /* ─── IntersectionObserver ───────────────────────────────
        threshold: 0  →  fires the moment any pixel of the
@@ -108,7 +124,7 @@ export default function KeyboardScene() {
         if (entry.isIntersecting) play();
         else pause();
       },
-      { threshold: 0 }
+      { threshold: 0.5 }
     );
     if (outerRef.current) io.observe(outerRef.current);
 
@@ -119,7 +135,7 @@ export default function KeyboardScene() {
     const onScroll = () => {
       if (!outerRef.current) return;
       const { top, bottom } = outerRef.current.getBoundingClientRect();
-      if (top < window.innerHeight && bottom > 0) play();
+      if (top <= 0 && bottom > 0) play();
     };
     window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -167,23 +183,36 @@ export default function KeyboardScene() {
             playsInline
             muted
             preload="auto"
+            style={{ 
+              opacity: completed ? 0 : 1,
+              transition: 'opacity 0.8s ease-in-out'
+            }}
           />
           <div className="ks-vignette" />
 
           {/* Single bottom-left text block — content crossfades between stages */}
-          <div className="ks-text-block">
-            <p className="ks-eyebrow" key={`ey-${stageIdx}`}>{stage.eyebrow}</p>
-            <h2 className="ks-head" key={`hd-${stageIdx}`}>
-              {stage.headline.split('\n').map((line, i) => (
-                <span key={i}>{line}{i < stage.headline.split('\n').length - 1 && <br />}</span>
-              ))}
-            </h2>
-            <p className="ks-body" key={`bd-${stageIdx}`}>
-              {stage.body.split('\n').map((line, i) => (
-                <span key={i}>{line}{i < stage.body.split('\n').length - 1 && <br />}</span>
-              ))}
-            </p>
-          </div>
+          {completed ? (
+            <div className="ks-centered-wrapper ks-fade-in">
+              <div className="ks-centered-text">
+                <h2 className="ks-minimal-greet">hey, great to see you!</h2>
+                <p className="ks-minimal-sub">scroll down to explore more about me</p>
+              </div>
+            </div>
+          ) : (
+            <div className="ks-text-block">
+              <p className="ks-eyebrow" key={`ey-${stageIdx}`}>{stage.eyebrow}</p>
+              <h2 className="ks-head" key={`hd-${stageIdx}`}>
+                {stage.headline.split('\n').map((line, i) => (
+                  <span key={i}>{line}{i < stage.headline.split('\n').length - 1 && <br />}</span>
+                ))}
+              </h2>
+              <p className="ks-body" key={`bd-${stageIdx}`}>
+                {stage.body.split('\n').map((line, i) => (
+                  <span key={i}>{line}{i < stage.body.split('\n').length - 1 && <br />}</span>
+                ))}
+              </p>
+            </div>
+          )}
 
           {/* Thin gold progress bar at bottom */}
           <div className="ks-progress-track">
