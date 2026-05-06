@@ -2,14 +2,74 @@ import { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import './portfolio.css';
 import KeyboardScene from './KeyboardScene';
+import LogoLoop from './LogoLoop';
+import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiPython, SiDjango, SiNodedotjs, SiMongodb } from 'react-icons/si';
+
+const techLogos = [
+  { node: <SiReact />, title: "React", href: "https://react.dev" },
+  { node: <SiNextdotjs />, title: "Next.js", href: "https://nextjs.org" },
+  { node: <SiTypescript />, title: "TypeScript", href: "https://www.typescriptlang.org" },
+  { node: <SiTailwindcss />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
+  { node: <SiPython />, title: "Python", href: "https://python.org" },
+  { node: <SiDjango />, title: "Django", href: "https://djangoproject.com" },
+  { node: <SiNodedotjs />, title: "Node.js", href: "https://nodejs.org" },
+  { node: <SiMongodb />, title: "MongoDB", href: "https://mongodb.com" },
+];
+
+const SERVICES_DATA = [
+  {
+    id: 1,
+    title: "Full Stack Web Apps",
+    icon: "</>",
+    desc: "End-to-end development using React, Django, and Node.js for robust, scalable applications.",
+    img: "https://placehold.co/800x450/1a1a1a/gold?text=Full+Stack+Apps"
+  },
+  {
+    id: 2,
+    title: "ERP Systems",
+    icon: "◈",
+    desc: "Comprehensive Enterprise Resource Planning systems to manage operations and workflows efficiently.",
+    img: "https://placehold.co/800x450/1a1a1a/teal?text=ERP+Systems",
+    video: "/ProjectVideo/ERP.mp4"
+  },
+  {
+    id: 3,
+    title: "REST API Design",
+    icon: "⟐",
+    desc: "Building secure, documented, and high-performance backend systems and microservices.",
+    img: "https://placehold.co/800x450/1a1a1a/gold?text=REST+APIs"
+  },
+  {
+    id: 4,
+    title: "AI Integration",
+    icon: "⚡",
+    desc: "Implementing LLM pipelines, agentic workflows, and machine learning models into products.",
+    img: "https://placehold.co/800x450/1a1a1a/teal?text=AI+Integration"
+  },
+  {
+    id: 5,
+    title: "Auth & Security",
+    icon: "🔐",
+    desc: "Secure JWT, OAuth, role-based access control, and Web3 wallet authentication.",
+    img: "https://placehold.co/800x450/1a1a1a/gold?text=Auth+&+Security",
+    video: "/ProjectVideo/blockchain.mp4"
+  },
+  {
+    id: 6,
+    title: "Deployment & DevOps",
+    icon: "☁",
+    desc: "CI/CD pipelines, Docker containerization, and hosting on platforms like Vercel and AWS.",
+    img: "https://placehold.co/800x450/1a1a1a/teal?text=DevOps"
+  }
+];
 
 const SECTIONS = [
   { id: 's-home', label: 'Home', icon: '⌂' },
   { id: 's-summary', label: 'About', icon: '◎' },
-  { id: 's-experience-new', label: 'Experience', icon: '⌚' },
+  { id: 's-services', label: 'Services', icon: '❖' },
+  { id: 's-process', label: 'Process', icon: '⟐' },
   { id: 's-projects', label: 'Projects', icon: '◈' },
   { id: 's-skills', label: 'Skills', icon: '⟨/⟩' },
-  { id: 's-achievements', label: 'Awards', icon: '★' },
   { id: 's-contact', label: 'Contact', icon: '✉' },
 ];
 
@@ -18,6 +78,17 @@ export default function Portfolio() {
   const [showSkills, setShowSkills] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const sectionRefs = useRef({});
+
+  const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
+  const [isServiceHovered, setIsServiceHovered] = useState(false);
+
+  useEffect(() => {
+    if (isServiceHovered) return;
+    const interval = setInterval(() => {
+      setCurrentServiceIndex((prev) => (prev + 1) % SERVICES_DATA.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isServiceHovered]);
 
   // Intersection Observer: track which section is in view → update active nav
   useEffect(() => {
@@ -100,11 +171,11 @@ export default function Portfolio() {
     emailjs.send(
       import.meta.env.VITE_EMAILJS_SERVICE_ID,
       import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      { 
-        from_name: form.name, 
-        from_email: form.email, 
-        message: form.message, 
-        to_email: 'divymevada.work@gmail.com' 
+      {
+        from_name: form.name,
+        from_email: form.email,
+        message: form.message,
+        to_email: 'divymevada.work@gmail.com'
       },
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY
     ).then(() => {
@@ -142,23 +213,20 @@ export default function Portfolio() {
             <div className="hero-content">
               <div className="status-badge">
                 <div className="status-dot"></div>
-                Open to Work
+                Available for freelance & internships
               </div>
-              <div className="hero-role">Software Engineer · Full-Stack · AI/ML  & Web3 Developer </div>
+              <div className="hero-role">Full Stack Engineer & Product Developer</div>
               <div className="hero-name">Divy<br />Mevada</div>
               <p className="hero-desc">
-                Building blockchain systems, AI platforms &amp; smart-city analytics. Hackathon winner. Deep problem solver. Currently at Nirma University, shaping ideas into products.
+                Building scalable web platforms, SaaS dashboards, and AI-powered products. I help turn ideas into scalable digital products using React, Django, and modern tooling.
               </p>
               <div className="hero-contacts">
+                <button onClick={() => handleNav('s-projects')} className="action-btn" style={{ background: 'var(--gold)', color: '#080b0f', borderColor: 'var(--gold)', fontWeight: 700 }}>View Projects</button>
+                <button onClick={() => handleNav('s-contact')} className="action-btn" style={{ fontWeight: 600 }}>Let's Work Together</button>
+                <div style={{ width: '100%', height: '8px' }}></div>
                 <a href="https://www.linkedin.com/in/divy-mevada-4230332bb/" target="_blank" rel="noopener noreferrer" className="contact-item">in LinkedIn</a>
                 <a href="https://github.com/divy-mevada" target="_blank" rel="noopener noreferrer" className="contact-item">⌥ GitHub</a>
                 <span className="contact-item">◎ Ahmedabad, IN</span>
-              </div>
-            </div>
-            <div className="hero-visual">
-              <div className="avatar-wrap">
-                <div className="avatar-ring"></div>
-                <div className="avatar-inner">DM</div>
               </div>
             </div>
           </div>
@@ -236,55 +304,110 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* EXPERIENCE */}
+        {/* SERVICES */}
         <div
           className="section"
-          id="s-experience-new"
-          ref={(el) => (sectionRefs.current['s-experience-new'] = el)}
+          id="s-services"
+          ref={(el) => (sectionRefs.current['s-services'] = el)}
         >
           <div className="glass projects-intro">
-            <div className="section-label">Career Journey</div>
-            <div className="section-title">Experience &amp; <span className="highlight">Achievements</span></div>
+            <div className="section-label">What I Do</div>
+            <div className="section-title">End-to-End <span className="highlight">Product Development</span></div>
+            <p className="body-text">I bring ideas from concept to production with a focus on scalable architecture and premium user experience.</p>
           </div>
-          <div className="timeline">
-            {[
-              {
-                role: '2nd Runner-Up',
-                organization: 'National Hackathon · IIT Gandhinagar',
-                period: '2024',
-                description: 'Developed DHRUVA, a blockchain-based credential verification system. Won ₹30,000 and competed against top talent nationwide.',
-                type: 'Award'
-              },
-              {
-                role: 'Executive Member',
-                organization: 'CSI Nirma University',
-                period: '2023 - Present',
-                description: 'Organizing workshops, technical sessions, and hackathons for the student community at Nirma University.',
-                type: 'Leadership'
-              },
-              {
-                role: 'Top 10 Finalist',
-                organization: 'Ingenious 7.0 Hackathon',
-                period: '2024',
-                description: 'Built a smart-city analytics platform (City View) and ranked in the top 10 out of 120+ teams.',
-                type: 'Achievement'
-              }
-            ].map((exp, index) => (
-              <div key={index} className="timeline-item">
-                <div className="timeline-dot"></div>
-                <div className="timeline-content glass">
-                  <div className="exp-header">
-                    <span className="exp-type">{exp.type}</span>
-                    <span className="exp-period">{exp.period}</span>
+          <div
+            className="service-slider-container"
+            onMouseEnter={() => setIsServiceHovered(true)}
+            onMouseLeave={() => setIsServiceHovered(false)}
+          >
+            <div
+              className="service-slider-track"
+              style={{ transform: `translateX(-${currentServiceIndex * 100}%)` }}
+            >
+              {SERVICES_DATA.map((service, idx) => (
+                <div className="service-slide glass" key={service.id}>
+                  <div className="service-slide-content">
+                    <div className="service-icon">{service.icon}</div>
+                    <h3 className="service-title">{service.title}</h3>
+                    <p className="service-desc">{service.desc}</p>
                   </div>
-                  <h3 className="exp-role">{exp.role}</h3>
-                  <h4 className="exp-org">{exp.organization}</h4>
-                  <p className="exp-desc">{exp.description}</p>
+                  <div className="service-slide-image">
+                    {service.video ? (
+                      <video src={service.video} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <img src={service.img} alt={service.title} />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <div className="service-slider-dots">
+              {SERVICES_DATA.map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`slider-dot ${idx === currentServiceIndex ? 'active' : ''}`}
+                  onClick={() => setCurrentServiceIndex(idx)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div style={{ height: '120px', marginTop: '60px', position: 'relative', overflow: 'hidden', width: '100vw', left: '50%', transform: 'translateX(-50%)' }}>
+            <LogoLoop
+              logos={techLogos}
+              speed={100}
+              direction="left"
+              logoHeight={40}
+              gap={60}
+              pauseOnHover={true}
+              scaleOnHover={true}
+              fadeOut={true}
+              fadeOutColor="transparent"
+              ariaLabel="Technology partners"
+            />
           </div>
         </div>
+
+        {/* PROCESS */}
+        <div
+          className="section"
+          id="s-process"
+          ref={(el) => (sectionRefs.current['s-process'] = el)}
+        >
+          <div className="glass projects-intro" style={{ marginBottom: '40px' }}>
+            <div className="section-label">How I Work</div>
+            <div className="section-title">The Development <span className="highlight">Process</span></div>
+          </div>
+          <div className="process-steps">
+            <div className="glass process-step">
+              <div className="step-num">01</div>
+              <h4 className="step-title">Discover</h4>
+              <p className="step-desc">Requirements gathering, architecture planning, and feasibility analysis.</p>
+            </div>
+            <div className="glass process-step">
+              <div className="step-num">02</div>
+              <h4 className="step-title">Design</h4>
+              <p className="step-desc">System design, database modeling, and UI wireframing.</p>
+            </div>
+            <div className="glass process-step">
+              <div className="step-num">03</div>
+              <h4 className="step-title">Build</h4>
+              <p className="step-desc">Iterative, clean-code development with regular milestone reviews.</p>
+            </div>
+            <div className="glass process-step">
+              <div className="step-num">04</div>
+              <h4 className="step-title">Test</h4>
+              <p className="step-desc">Rigorous QA, performance profiling, and accessibility checks.</p>
+            </div>
+            <div className="glass process-step">
+              <div className="step-num">05</div>
+              <h4 className="step-title">Deploy</h4>
+              <p className="step-desc">Automated CI/CD deployment, monitoring setup, and smooth handoff.</p>
+            </div>
+          </div>
+        </div>
+
 
         {/* PROJECTS */}
         <div
@@ -294,71 +417,83 @@ export default function Portfolio() {
         >
           <div className="glass projects-intro">
             <div className="section-label">Featured Work</div>
-            <div className="section-title">Projects that <span className="highlight">matter</span></div>
-            <p className="body-text">Award-winning builds from national hackathons — real problems, real impact.</p>
+            <div className="section-title">Case Studies & <span className="highlight">Projects</span></div>
+            <p className="body-text">Award-winning products built for scale, performance, and impact.</p>
           </div>
           <div className="projects-list">
-            <div className="glass project-card">
+            <div className="glass project-card case-study">
               <div className="project-header">
-                <div className="project-number">01 — NATIONAL HACKATHON · IIT GANDHINAGAR</div>
-                <div className="project-badge">2nd Runner-Up</div>
+                <div className="project-number">01 — BLOCKCHAIN PLATFORM</div>
+                <div className="project-badge">2nd Runner-Up (National)</div>
               </div>
               <div className="project-title">DHRUVA</div>
-              <div className="project-sub">Blockchain Credential Verification Platform</div>
-              <ul className="project-bullets">
-                <li>Built a blockchain-based platform enabling tamper-proof credential issuance and instant verification at national scale.</li>
-                <li>Implemented secure credential storage with QR-based credential sharing for seamless identity management.</li>
-                <li>Designed an intuitive UI abstracting blockchain complexity for non-technical users.</li>
-              </ul>
-              <div className="project-achievement">₹30,000 Prize — Competed nationally</div>
-              <div className="project-actions">
+              <div className="project-sub">Credential Verification System</div>
+
+              <div className="project-narrative">
+                <p><strong>Problem:</strong> Credential fraud and slow verification processes at the national level.</p>
+                <p><strong>Solution:</strong> Built a tamper-proof blockchain platform for instant issuance and QR-based verification, abstracting blockchain complexity into an intuitive UI.</p>
+              </div>
+
+              <div className="project-stack">
+                <span>React</span><span>Web3</span><span>Solidity</span><span>Node.js</span>
+              </div>
+
+              <div className="project-actions" style={{ marginTop: '24px' }}>
                 <a href="https://github.com/divy-mevada/DHRUVA_" target="_blank" rel="noopener noreferrer" className="action-btn">
                   <span>⌥</span> GitHub
                 </a>
-                <a href="https://dhruva-8.netlify.app/" target="_blank" rel="noopener noreferrer" className="action-btn">
+                <a href="https://dhruva-8.netlify.app/" target="_blank" rel="noopener noreferrer" className="action-btn" style={{ background: 'var(--gold)', color: '#080b0f', borderColor: 'var(--gold)' }}>
                   <span>◎</span> Live Demo
                 </a>
               </div>
             </div>
 
-            <div className="glass project-card">
+            <div className="glass project-card case-study">
               <div className="project-header">
-                <div className="project-number">02 — INGENIOUS 7.0 HACKATHON</div>
+                <div className="project-number">02 — SMART CITY ANALYTICS</div>
                 <div className="project-badge">Top 10 / 120+ Teams</div>
               </div>
               <div className="project-title">CITY VIEW</div>
-              <div className="project-sub">Integrated Urban Intelligence Platform</div>
-              <ul className="project-bullets">
-                <li>Developed a smart-city analytics platform integrating air quality monitoring, traffic analytics, and infrastructure insights.</li>
-                <li>Built real-time dashboards enabling data-driven urban planning for civic administrators.</li>
-                <li>Processed live sensor streams and presented actionable visualizations for city-scale decisions.</li>
-              </ul>
-              <div className="project-achievement">Top 10 among 120+ competing teams</div>
-              <div className="project-actions">
+              <div className="project-sub">Integrated Urban Intelligence Dashboard</div>
+
+              <div className="project-narrative">
+                <p><strong>Problem:</strong> Civic administrators lacked real-time, actionable data on urban infrastructure.</p>
+                <p><strong>Solution:</strong> Developed a dashboard that ingests live sensor streams to visualize air quality and traffic analytics for data-driven urban planning.</p>
+              </div>
+
+              <div className="project-stack">
+                <span>React</span><span>Python</span><span>IoT Streams</span><span>Data Viz</span>
+              </div>
+
+              <div className="project-actions" style={{ marginTop: '24px' }}>
                 <a href="https://github.com/divy-mevada/Delighful_Derek" target="_blank" rel="noopener noreferrer" className="action-btn">
                   <span>⌥</span> GitHub
                 </a>
               </div>
             </div>
 
-            <div className="glass project-card">
+            <div className="glass project-card case-study">
               <div className="project-header">
-                <div className="project-number">03 — GDG GANDHINAGAR HACKATHON</div>
+                <div className="project-number">03 — ESG COMPLIANCE</div>
                 <div className="project-badge">Top 15 / 700+ Teams</div>
               </div>
               <div className="project-title">ESGresolve</div>
-              <div className="project-sub">ESG Analytics Platform</div>
-              <ul className="project-bullets">
-                <li>Built a full-stack platform converting complex ESG datasets into actionable sustainability insights for organizations.</li>
-                <li>Designed dashboards for ESG evaluation, risk detection, and compliance tracking across sectors.</li>
-                <li>Qualified for offline finals from a pool of 700+ competing teams nationwide.</li>
-              </ul>
-              <div className="project-achievement">Qualified Offline Finals — 700+ teams</div>
-              <div className="project-actions">
+              <div className="project-sub">Sustainability Analytics Platform</div>
+
+              <div className="project-narrative">
+                <p><strong>Problem:</strong> Organizations struggle to convert complex ESG datasets into actionable compliance insights.</p>
+                <p><strong>Solution:</strong> Built a full-stack platform for ESG evaluation and risk detection, qualifying for the offline finals among 700+ competing teams.</p>
+              </div>
+
+              <div className="project-stack">
+                <span>React</span><span>Express</span><span>MongoDB</span><span>Analytics</span>
+              </div>
+
+              <div className="project-actions" style={{ marginTop: '24px' }}>
                 <a href="https://github.com/divy-mevada/ESGresolve" target="_blank" rel="noopener noreferrer" className="action-btn">
                   <span>⌥</span> GitHub
                 </a>
-                <a href="https://esg-resolve-067.vercel.app/" target="_blank" rel="noopener noreferrer" className="action-btn">
+                <a href="https://esg-resolve-067.vercel.app/" target="_blank" rel="noopener noreferrer" className="action-btn" style={{ background: 'var(--gold)', color: '#080b0f', borderColor: 'var(--gold)' }}>
                   <span>◎</span> Live Demo
                 </a>
               </div>
@@ -491,8 +626,8 @@ export default function Portfolio() {
         >
           <div className="glass contact-card">
             <div className="section-label">Get In Touch</div>
-            <div className="section-title">Let's <span className="highlight">Connect</span></div>
-            <p className="contact-subtitle">Have a project in mind or just want to say hi? My inbox is always open.</p>
+            <div className="section-title">Let's build something <span className="highlight">impactful</span></div>
+            <p className="contact-subtitle">I typically respond within 24 hours. Open to freelance, internships, and product collaborations.</p>
 
             <div className="contact-grid">
               <div className="contact-info">
@@ -529,6 +664,7 @@ export default function Portfolio() {
                 <button type="submit" className="btn-primary w-full" disabled={sending}>
                   {sending ? 'Sending...' : sent ? '✓ Message Sent!' : 'Send Message'}
                 </button>
+                <p style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'center', marginTop: '8px' }}>Secure contact form via EmailJS.</p>
               </form>
             </div>
           </div>
