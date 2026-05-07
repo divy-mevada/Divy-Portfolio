@@ -1695,3 +1695,67 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* --- MOBILE RESPONSIVENESS FIXES --- */
+@media (max-width: 768px) {
+  /* Fix horizontal overflow globally */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Adjust huge typography for mobile */
+  .hero-name {
+    font-size: clamp(36px, 8vw, 52px) !important;
+  }
+  .section-title {
+    font-size: clamp(24px, 6vw, 32px) !important;
+  }
+  .hero-role {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  /* Adjust Hero Contacts/Buttons to wrap cleanly */
+  .hero-contacts {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .hero-contacts .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .hero-contacts .contact-item {
+    justify-content: center;
+  }
+
+  /* Fix .nav-bar overflow */
+  .nav-bar {
+    max-width: 90vw;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 8px 12px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .nav-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-btn {
+    flex-shrink: 0;
+  }
+
+  /* Fix Footer layout */
+  .footer-container {
+    padding: 40px 0 24px;
+  }
+  .footer-links {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .link-group h4 {
+    margin-bottom: 12px;
+  }
+}
+
