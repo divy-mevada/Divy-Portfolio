@@ -1,9 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
-   KeyboardScene — Hero section styles
-   Fonts: Syne (headings) + DM Sans (body) — matches portfolio
+   KeyboardScene — Scroll-Driven Canvas Video Scene
+   Fonts: Syne (headings) + DM Sans (body)
    Colors: --gold (#c9a84c) · --teal (#2dd4bf) · --text (#f0ece4)
-   All classes scoped to .ks-* — no existing styles changed.
-═══════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════ */
 
 /* ── Phase 1 — Black intro screen (100 vh) ───────────────── */
 .ks-intro {
@@ -15,11 +14,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
 .ks-intro-title {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(32px, 4vw, 52px);
+  font-size: clamp(36px, 5vw, 56px);
   font-weight: 800;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--text, #f0ece4) 40%, var(--gold-light, #e8c96a));
@@ -41,7 +41,7 @@
   align-items: center;
   gap: 8px;
   pointer-events: none;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.4s ease;
 }
 
 .ks-arrow-icon {
@@ -70,32 +70,35 @@
   to   { opacity: 1; transform: translateY(0);    }
 }
 
-/* ── Phase 2 — Keyboard video outer container (200 vh) ───── */
+/* ── Phase 2 — Keyboard Video Canvas Outer Container (350 vh) ─── */
 .ks-outer {
   position: relative;
   width: 100%;
-  height: 200vh;
+  height: 350vh;
   z-index: 1;
+  touch-action: pan-y;
 }
 
 .ks-sticky {
   position: sticky;
   top: 0;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  background: #080b0f;      /* matches --bg exactly */
+  background: #080b0f;
+  touch-action: pan-y;
 }
 
-/* ── Video ──────────────────────────────────────────────── */
-.ks-video {
+/* ── Full Viewport Canvas ───────────────────────────────── */
+.ks-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
   display: block;
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* ── Vignette — dark edges for text legibility ──────────── */
@@ -103,9 +106,9 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse 75% 65% at 50% 50%,
+    ellipse 80% 70% at 50% 50%,
     transparent 0%,
-    rgba(8, 11, 15, 0.50) 60%,
+    rgba(8, 11, 15, 0.45) 60%,
     rgba(8, 11, 15, 0.90) 100%
   );
   pointer-events: none;
@@ -119,11 +122,11 @@
   left: 7vw;
   z-index: 10;
   pointer-events: none;
-  max-width: 520px;
+  max-width: 540px;
   text-align: left;
 }
 
-/* ── Centered Minimal Text (Completed State) ──────────── */
+/* ── Centered Minimal Text (Completed State) ────────────── */
 .ks-centered-wrapper {
   position: absolute;
   inset: 0;
@@ -162,7 +165,7 @@
   color: var(--text-muted, rgba(240, 236, 228, 0.45));
 }
 
-/* ── Headings (Syne — matches Home / About section headings) */
+/* ── Headings ───────────────────────────────────────────── */
 .ks-eyebrow {
   font-family: 'DM Sans', sans-serif;
   font-size: 11px;
@@ -189,6 +192,16 @@
   animation: ksCrossfade 0.5s ease both;
 }
 
+.ks-body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(13px, 1.3vw, 15px);
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--text-muted, rgba(240, 236, 228, 0.65));
+  margin-bottom: 10px;
+  animation: ksCrossfade 0.5s ease 0.08s both;
+}
+
 @keyframes ksCrossfade {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0);    }
@@ -198,109 +211,24 @@
   animation: ksCrossfade 0.8s ease forwards;
 }
 
-.ks-sub {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(17px, 2vw, 24px);
-  font-weight: 300;
-  color: var(--text-muted, rgba(240, 236, 228, 0.55));
-  letter-spacing: 0.01em;
-  margin-bottom: 22px;
+/* ── Scroll progress bar (bottom of sticky panel) ───────── */
+.ks-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(201, 168, 76, 0.10);
+  z-index: 20;
+  pointer-events: none;
 }
 
-.ks-sub--sm {
-  font-size: clamp(13px, 1.5vw, 17px);
-  margin-bottom: 32px;
-}
-
-.ks-body {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(13px, 1.3vw, 15px);
-  font-weight: 400;
-  line-height: 1.8;
-  color: var(--text-muted, rgba(240, 236, 228, 0.50));
-  margin-bottom: 10px;
-  animation: ksCrossfade 0.5s ease 0.08s both;
-}
-
-.ks-body--muted {
-  color: var(--text-dim, rgba(240, 236, 228, 0.30));
-}
-
-/* ── Bullet list (beat 3) ───────────────────────────────── */
-.ks-list {
-  list-style: none;
-  padding: 0;
-  margin: 18px 0 0;
-}
-
-.ks-list li {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(13px, 1.35vw, 15px);
-  font-weight: 400;
-  color: var(--text-muted, rgba(240, 236, 228, 0.55));
-  line-height: 1.75;
-  padding: 5px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.ks-list li::before {
-  content: '—';
-  color: var(--gold, #c9a84c);
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-/* ── CTA buttons ───────────────────────────────────────── */
-.ks-cta-row {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-  pointer-events: all;
-  margin-top: 10px;
-}
-
-.ks-btn {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  padding: 13px 30px;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-/* Gold gradient button — matches portfolio's gold theme */
-.ks-btn--gold {
-  background: linear-gradient(135deg, var(--gold, #c9a84c), var(--gold-light, #e8c96a));
-  color: #080b0f;
-  box-shadow: 0 0 28px rgba(201, 168, 76, 0.35);
-}
-
-.ks-btn--gold:hover {
-  box-shadow: 0 0 48px rgba(201, 168, 76, 0.55);
-  transform: translateY(-2px) scale(1.02);
-}
-
-/* Ghost button */
-.ks-btn--ghost {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(201, 168, 76, 0.25);
-  color: var(--text-muted, rgba(240, 236, 228, 0.75));
-}
-
-.ks-btn--ghost:hover {
-  background: rgba(201, 168, 76, 0.08);
-  border-color: rgba(201, 168, 76, 0.45);
-  color: var(--gold-light, #e8c96a);
-  transform: translateY(-2px);
+.ks-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold, #c9a84c), var(--gold-light, #e8c96a));
+  box-shadow: 0 0 8px rgba(201, 168, 76, 0.5);
+  transition: width 50ms linear;
+  border-radius: 0 2px 2px 0;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
@@ -322,24 +250,4 @@
   .ks-body { 
     font-size: 14px !important; 
   }
-}
-
-/* ── Scroll progress bar (bottom of sticky panel) ───────── */
-.ks-progress-track {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: rgba(201, 168, 76, 0.10);
-  z-index: 20;
-  pointer-events: none;
-}
-
-.ks-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--gold, #c9a84c), var(--gold-light, #e8c96a));
-  box-shadow: 0 0 8px rgba(201, 168, 76, 0.5);
-  transition: width 80ms linear;
-  border-radius: 0 2px 2px 0;
 }

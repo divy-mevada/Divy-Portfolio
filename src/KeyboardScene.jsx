@@ -1,15 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
 import './KeyboardScene.css';
 
-/* ─── Config ─────────────────────────────────────────────── */
-const MAX_VIDEO_TIME = 6; // stop video at 6 seconds
+gsap.registerPlugin(ScrollTrigger);
 
-/* ─── 3 text stages, keyed to video progress (0 → 1) ────── */
+const TOTAL_FRAMES = 240;
+const FRAME_PATH = (index) => `/assets/frames/frame_${String(index).padStart(4, '0')}.webp`;
+
 const STAGES = [
   {
     eyebrow: 'Welcome',
     headline: 'Divy Mevada',
-    body: 'Developer.  Designer.  Builder.\nCrafting experiences at the intersection\nof design and engineering.',
+    body: 'Developer. Designer. Builder.\nCrafting experiences at the intersection\nof design and engineering.',
   },
   {
     eyebrow: 'Philosophy',
@@ -19,134 +23,185 @@ const STAGES = [
   {
     eyebrow: "Let's connect",
     headline: 'Open to\nopportunities.',
-    body: 'Collaborations, full-stack projects,\nand bold ideas — let\'s build something real.',
-  },
-  {
-    eyebrow: "Explore More",
-    headline: "Ready to\nexplore?",
-    body: "Scroll down to see my full portfolio, projects, and skills. Or replay the intro to see it again.",
+    body: "Collaborations, full-stack projects,\nand bold ideas — let's build something real.",
   },
 ];
 
 export default function KeyboardScene() {
-  const outerRef      = useRef(null);
-  const videoRef      = useRef(null);
-  const rafRef        = useRef(null);
-  const playingRef    = useRef(false);
+  const outerRef = useRef(null);
+  const canvasRef = useRef(null);
+  const imagesRef = useRef([]);
+  const currentFrameRef = useRef(0);
 
-  const [stageIdx,      setStageIdx]      = useState(0);
-  const [hintOpacity,   setHintOpacity]   = useState(1);
-  const [panelOpacity,  setPanelOpacity]  = useState(1);
-  const [completed,     setCompleted]     = useState(false);
+  const [hintOpacity, setHintOpacity] = useState(1);
+  const [stageIdx, setStageIdx] = useState(0);
+  const [completed, setCompleted] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  /* ── Intro hint fades as user scrolls away from intro ── */
+  // Responsive DPR & Object-fit Cover Canvas Renderer
+  const renderFrame = useCallback((frameIndex) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) return;
+
+    const img = imagesRef.current[frameIndex] || imagesRef.current[0];
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const displayWidth = window.innerWidth;
+    const displayHeight = window.innerHeight;
+
+    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+    }
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    // Object-fit: cover calculation
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const canvasRatio = displayWidth / displayHeight;
+
+    let renderW, renderH, offX, offY;
+
+    if (canvasRatio > imgRatio) {
+      renderW = displayWidth;
+      renderH = displayWidth / imgRatio;
+      offX = 0;
+      offY = (displayHeight - renderH) / 2;
+    } else {
+      renderH = displayHeight;
+      renderW = displayHeight * imgRatio;
+      offX = (displayWidth - renderW) / 2;
+      offY = 0;
+    }
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, offX, offY, renderW, renderH);
+
+    ctx.restore();
+  }, []);
+
+  // Preload frames silently in background
   useEffect(() => {
-    const onScroll = () =>
-      setHintOpacity(Math.max(0, 1 - window.scrollY / window.innerHeight));
+    const loadedImages = new Array(TOTAL_FRAMES);
+
+    // Load first frame immediately and render
+    const firstImg = new Image();
+    firstImg.src = FRAME_PATH(1);
+    firstImg.onload = () => {
+      loadedImages[0] = firstImg;
+      imagesRef.current[0] = firstImg;
+      renderFrame(0);
+    };
+
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      const img = new Image();
+      const idx = i - 1;
+      img.src = FRAME_PATH(i);
+      img.onload = () => {
+        loadedImages[idx] = img;
+      };
+    }
+    imagesRef.current = loadedImages;
+  }, [renderFrame]);
+
+  // Window resize handler
+  useEffect(() => {
+    const handleResize = () => renderFrame(currentFrameRef.current);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, [renderFrame]);
+
+  // Fade intro hint on scroll
+  useEffect(() => {
+    const onScroll = () => {
+      setHintOpacity(Math.max(0, 1 - window.scrollY / (window.innerHeight * 0.7)));
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* ── On video complete → fade panel → scroll to portfolio ── */
+  // Lenis Smooth Momentum Scroll + GSAP ScrollTrigger Scrub
   useEffect(() => {
-    if (!completed) return;
-    // Removed setPanelOpacity(0) to keep video visible
-    const t = setTimeout(() => {
-      if (outerRef.current) {
-        const end = outerRef.current.offsetTop + outerRef.current.offsetHeight;
-        window.scrollTo({ top: end, behavior: 'smooth' });
-      }
-    }, 1000);
-    return () => clearTimeout(t);
-  }, [completed]);
-
-  /* ── Core: video autoplay + stage tracking ── */
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted       = true;
-    video.preload     = 'auto';
-    video.playsInline = true;
-
-    /* rAF: cap at MAX_VIDEO_TIME, update stage, detect end */
-    const tick = () => {
-      if (video.duration) {
-        // Hard-stop at 6 seconds
-        if (video.currentTime >= MAX_VIDEO_TIME) {
-          video.pause();
-          video.currentTime = MAX_VIDEO_TIME;
-          setCompleted(true);
-          setStageIdx(3); // Final stage
-        } else {
-          // Update text stage based on playback progress
-          const p = video.currentTime / MAX_VIDEO_TIME;
-          const idx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
-          setStageIdx(idx);
-        }
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-
-    /* ─── Play/pause helpers ─────────────────────────────── */
-    const play = () => {
-      if (!playingRef.current && video.currentTime < MAX_VIDEO_TIME) {
-        playingRef.current = true;
-        // video.currentTime = 0; // Removed to allow resume if needed, though we stop at 6s anyway
-        video.play().catch(() => { playingRef.current = false; });
-      }
-    };
-    const pause = () => {
-      if (playingRef.current) {
-        playingRef.current = false;
-        video.pause();
-      }
-    };
-
-    const replay = () => {
-      video.currentTime = 0;
-      setCompleted(false);
-      setStageIdx(0);
-      playingRef.current = true;
-      video.play().catch(() => { playingRef.current = false; });
-    };
-
-    window.__replayVideo = replay; // Expose for the button
-
-    /* ─── IntersectionObserver ───────────────────────────────
-       threshold: 0  →  fires the moment any pixel of the
-       200vh outer div enters the viewport.
-       (The old bug was threshold: 0.55 on 200vh = impossible.)
-    ──────────────────────────────────────────────────────── */
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) play();
-        else pause();
-      },
-      { threshold: 0.5 }
+    const isTouchDevice = typeof window !== 'undefined' && (
+      'ontouchstart' in window || navigator.maxTouchPoints > 0
     );
-    if (outerRef.current) io.observe(outerRef.current);
 
-    /* ─── Scroll fallback ────────────────────────────────────
-       Handles trackpad / scrollbar edge cases where the
-       observer fires but .play() is blocked initially.
-    ──────────────────────────────────────────────────────── */
-    const onScroll = () => {
-      if (!outerRef.current) return;
-      const { top, bottom } = outerRef.current.getBoundingClientRect();
-      if (top <= 0 && bottom > 0) play();
+    const lenis = new Lenis({
+      duration: isTouchDevice ? 0.9 : 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.6,
+      syncTouch: true,
+    });
+    window.__lenis = lenis;
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    const tickerCb = (time) => {
+      lenis.raf(time * 1000);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    gsap.ticker.add(tickerCb);
+    gsap.ticker.lagSmoothing(0);
+
+    const frameObj = { frame: 0 };
+    const outerEl = outerRef.current;
+
+    const trigger = ScrollTrigger.create({
+      trigger: outerEl,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: isTouchDevice ? 0.15 : 0.4,
+      animation: gsap.to(frameObj, {
+        frame: TOTAL_FRAMES - 1,
+        ease: 'none',
+        duration: 1,
+      }),
+      onUpdate: (self) => {
+        const frameIdx = Math.min(
+          TOTAL_FRAMES - 1,
+          Math.max(0, Math.round(frameObj.frame))
+        );
+
+        if (frameIdx !== currentFrameRef.current) {
+          currentFrameRef.current = frameIdx;
+          renderFrame(frameIdx);
+        }
+
+        const p = self.progress;
+        setProgress(p);
+
+        if (p >= 0.96) {
+          setCompleted(true);
+        } else {
+          setCompleted(false);
+          if (p < 0.33) {
+            setStageIdx(0);
+          } else if (p < 0.66) {
+            setStageIdx(1);
+          } else {
+            setStageIdx(2);
+          }
+        }
+      },
+    });
 
     return () => {
-      io.disconnect();
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(rafRef.current);
+      trigger.kill();
+      gsap.ticker.remove(tickerCb);
+      lenis.destroy();
+      window.__lenis = null;
     };
-  }, []);
+  }, [renderFrame]);
 
-  const stage = STAGES[stageIdx];
+  const stage = STAGES[stageIdx] || STAGES[0];
 
   return (
     <>
@@ -163,34 +218,15 @@ export default function KeyboardScene() {
       </div>
 
       {/* ══════════════════════════════════════════════════════
-          PHASE 2 — Keyboard video (sticky, 200 vh outer)
-          Video autoplays on intersection; one scroll triggers it.
-          After 6 s, panel fades and page scrolls to portfolio.
+          PHASE 2 — Scrollable Keyboard Video Canvas (sticky)
+          Clean, smooth bi-directional frame scrubbing on scroll.
       ══════════════════════════════════════════════════════ */}
       <div className="ks-outer" ref={outerRef}>
-        <div
-          className="ks-sticky"
-          style={{
-            opacity: panelOpacity,
-            transition: 'opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
-            pointerEvents: completed ? 'none' : 'auto',
-          }}
-        >
-          <video
-            ref={videoRef}
-            className="ks-video"
-            src="/keyboard.mp4"
-            playsInline
-            muted
-            preload="auto"
-            style={{ 
-              opacity: completed ? 0 : 1,
-              transition: 'opacity 0.8s ease-in-out'
-            }}
-          />
+        <div className="ks-sticky">
+          <canvas ref={canvasRef} className="ks-canvas" />
           <div className="ks-vignette" />
 
-          {/* Single bottom-left text block — content crossfades between stages */}
+          {/* Single bottom-left text block / minimal greeting on completion */}
           {completed ? (
             <div className="ks-centered-wrapper ks-fade-in">
               <div className="ks-centered-text">
@@ -218,11 +254,7 @@ export default function KeyboardScene() {
           <div className="ks-progress-track">
             <div
               className="ks-progress-fill"
-              style={{
-                width: videoRef.current?.duration
-                  ? `${Math.min(videoRef.current.currentTime / MAX_VIDEO_TIME, 1) * 100}%`
-                  : '0%'
-              }}
+              style={{ width: `${progress * 100}%` }}
             />
           </div>
         </div>

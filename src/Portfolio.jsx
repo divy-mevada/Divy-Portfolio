@@ -3,7 +3,9 @@ import emailjs from '@emailjs/browser';
 import './portfolio.css';
 import KeyboardScene from './KeyboardScene';
 import LogoLoop from './LogoLoop';
+import SpecularButton from './SpecularButton';
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiPython, SiDjango, SiNodedotjs, SiMongodb } from 'react-icons/si';
+import { FiHome, FiUser, FiLayers, FiGitBranch, FiFolder, FiCode, FiMail, FiDownload } from 'react-icons/fi';
 
 const techLogos = [
   { node: <SiReact />, title: "React", href: "https://react.dev" },
@@ -64,20 +66,44 @@ const SERVICES_DATA = [
 ];
 
 const SECTIONS = [
-  { id: 's-home', label: 'Home', icon: '⌂' },
-  { id: 's-summary', label: 'About', icon: '◎' },
-  { id: 's-services', label: 'Services', icon: '❖' },
-  { id: 's-process', label: 'Process', icon: '⟐' },
-  { id: 's-projects', label: 'Projects', icon: '◈' },
-  { id: 's-skills', label: 'Skills', icon: '⟨/⟩' },
-  { id: 's-contact', label: 'Contact', icon: '✉' },
+  { id: 's-home', label: 'Home', icon: <FiHome /> },
+  { id: 's-summary', label: 'About', icon: <FiUser /> },
+  { id: 's-services', label: 'Services', icon: <FiLayers /> },
+  { id: 's-process', label: 'Process', icon: <FiGitBranch /> },
+  { id: 's-projects', label: 'Projects', icon: <FiFolder /> },
+  { id: 's-skills', label: 'Skills', icon: <FiCode /> },
+  { id: 's-contact', label: 'Contact', icon: <FiMail /> },
 ];
 
 export default function Portfolio() {
   const [activeSection, setActiveSection] = useState('s-home');
   const [showSkills, setShowSkills] = useState(false);
   const [showNav, setShowNav] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('portfolio-theme');
+      if (saved) return saved;
+    } catch {
+      // fallback
+    }
+    return 'dark';
+  });
   const sectionRefs = useRef({});
+
+  // Sync theme with document element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem('portfolio-theme', theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const [isServiceHovered, setIsServiceHovered] = useState(false);
@@ -185,9 +211,13 @@ export default function Portfolio() {
   };
 
   const handleNav = (id) => {
-    const el = sectionRefs.current[id];
+    const el = sectionRefs.current[id] || document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.__lenis) {
+        window.__lenis.scrollTo(el, { offset: 0, duration: 1.4 });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 
@@ -209,11 +239,20 @@ export default function Portfolio() {
         >
           <div className="glass hero-card">
             <div className="hero-glow"></div>
-            <a href="https://drive.google.com/file/d/1dpzh3uJmrf1zaOSKVrzfgSyUknuHWB85/view?usp=sharing" className="download-btn" target="_blank" rel="noopener noreferrer">↓ Resume</a>
             <div className="hero-content">
-              <div className="status-badge">
-                <div className="status-dot"></div>
-                Available for freelance & internships
+              <div className="hero-top-row">
+                <div className="status-badge">
+                  <div className="status-dot"></div>
+                  Available for freelance & internships
+                </div>
+                <a
+                  href="https://drive.google.com/file/d/1dpzh3uJmrf1zaOSKVrzfgSyUknuHWB85/view?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="resume-btn"
+                >
+                  <FiDownload style={{ fontSize: '13px' }} /> Resume
+                </a>
               </div>
               <div className="hero-role">Full Stack Engineer & Product Developer</div>
               <div className="hero-name">Divy<br />Mevada</div>
@@ -221,8 +260,40 @@ export default function Portfolio() {
                 Building scalable web platforms, SaaS dashboards, and AI-powered products. I help turn ideas into scalable digital products using React, Django, and modern tooling.
               </p>
               <div className="hero-contacts">
-                <button onClick={() => handleNav('s-projects')} className="action-btn" style={{ background: 'var(--gold)', color: '#080b0f', borderColor: 'var(--gold)', fontWeight: 700 }}>View Projects</button>
-                <button onClick={() => handleNav('s-contact')} className="action-btn" style={{ fontWeight: 600 }}>Let's Work Together</button>
+                <SpecularButton
+                  onClick={() => handleNav('s-projects')}
+                  className="action-btn"
+                  size="sm"
+                  radius={100}
+                  tint="var(--gold)"
+                  tintOpacity={1}
+                  textColor="var(--nav-btn-active-color)"
+                  lineColor="#ffffff"
+                  baseColor="var(--gold)"
+                  intensity={1.3}
+                  proximity={200}
+                  followMouse
+                  style={{ fontWeight: 700 }}
+                >
+                  View Projects
+                </SpecularButton>
+                <SpecularButton
+                  onClick={() => handleNav('s-contact')}
+                  className="action-btn"
+                  size="sm"
+                  radius={100}
+                  tint="var(--action-btn-bg)"
+                  tintOpacity={1}
+                  textColor="var(--text)"
+                  lineColor="var(--gold-light)"
+                  baseColor="var(--glass-border)"
+                  intensity={1.0}
+                  proximity={200}
+                  followMouse
+                  style={{ fontWeight: 600 }}
+                >
+                  Let's Work Together
+                </SpecularButton>
                 <div style={{ width: '100%', height: '8px' }}></div>
                 <a href="https://www.linkedin.com/in/divy-mevada-4230332bb/" target="_blank" rel="noopener noreferrer" className="contact-item">in LinkedIn</a>
                 <a href="https://github.com/divy-mevada" target="_blank" rel="noopener noreferrer" className="contact-item">⌥ GitHub</a>
@@ -439,12 +510,43 @@ export default function Portfolio() {
               </div>
 
               <div className="project-actions" style={{ marginTop: '24px' }}>
-                <a href="https://github.com/divy-mevada/DHRUVA_" target="_blank" rel="noopener noreferrer" className="action-btn">
+                <SpecularButton
+                  href="https://github.com/divy-mevada/DHRUVA_"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="action-btn"
+                  size="sm"
+                  radius={100}
+                  tint="var(--action-btn-bg)"
+                  tintOpacity={1}
+                  textColor="var(--text)"
+                  lineColor="var(--gold-light)"
+                  baseColor="var(--glass-border)"
+                  intensity={1.0}
+                  proximity={180}
+                  followMouse
+                >
                   <span>⌥</span> GitHub
-                </a>
-                <a href="https://dhruva-8.netlify.app/" target="_blank" rel="noopener noreferrer" className="action-btn" style={{ background: 'var(--gold)', color: '#080b0f', borderColor: 'var(--gold)' }}>
+                </SpecularButton>
+                <SpecularButton
+                  href="https://dhruva-8.netlify.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="action-btn"
+                  size="sm"
+                  radius={100}
+                  tint="var(--gold)"
+                  tintOpacity={1}
+                  textColor="var(--nav-btn-active-color)"
+                  lineColor="#ffffff"
+                  baseColor="var(--gold)"
+                  intensity={1.3}
+                  proximity={180}
+                  followMouse
+                  style={{ fontWeight: 700 }}
+                >
                   <span>◎</span> Live Demo
-                </a>
+                </SpecularButton>
               </div>
             </div>
 
@@ -466,9 +568,24 @@ export default function Portfolio() {
               </div>
 
               <div className="project-actions" style={{ marginTop: '24px' }}>
-                <a href="https://github.com/divy-mevada/Delighful_Derek" target="_blank" rel="noopener noreferrer" className="action-btn">
+                <SpecularButton
+                  href="https://github.com/divy-mevada/Delighful_Derek"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="action-btn"
+                  size="sm"
+                  radius={100}
+                  tint="var(--action-btn-bg)"
+                  tintOpacity={1}
+                  textColor="var(--text)"
+                  lineColor="var(--gold-light)"
+                  baseColor="var(--glass-border)"
+                  intensity={1.0}
+                  proximity={180}
+                  followMouse
+                >
                   <span>⌥</span> GitHub
-                </a>
+                </SpecularButton>
               </div>
             </div>
 
@@ -490,12 +607,43 @@ export default function Portfolio() {
               </div>
 
               <div className="project-actions" style={{ marginTop: '24px' }}>
-                <a href="https://github.com/divy-mevada/ESGresolve" target="_blank" rel="noopener noreferrer" className="action-btn">
+                <SpecularButton
+                  href="https://github.com/divy-mevada/ESGresolve"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="action-btn"
+                  size="sm"
+                  radius={100}
+                  tint="var(--action-btn-bg)"
+                  tintOpacity={1}
+                  textColor="var(--text)"
+                  lineColor="var(--gold-light)"
+                  baseColor="var(--glass-border)"
+                  intensity={1.0}
+                  proximity={180}
+                  followMouse
+                >
                   <span>⌥</span> GitHub
-                </a>
-                <a href="https://esg-resolve-067.vercel.app/" target="_blank" rel="noopener noreferrer" className="action-btn" style={{ background: 'var(--gold)', color: '#080b0f', borderColor: 'var(--gold)' }}>
+                </SpecularButton>
+                <SpecularButton
+                  href="https://esg-resolve-067.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="action-btn"
+                  size="sm"
+                  radius={100}
+                  tint="var(--gold)"
+                  tintOpacity={1}
+                  textColor="var(--nav-btn-active-color)"
+                  lineColor="#ffffff"
+                  baseColor="var(--gold)"
+                  intensity={1.3}
+                  proximity={180}
+                  followMouse
+                  style={{ fontWeight: 700 }}
+                >
                   <span>◎</span> Live Demo
-                </a>
+                </SpecularButton>
               </div>
             </div>
           </div>
@@ -661,9 +809,24 @@ export default function Portfolio() {
                 <div className="form-group">
                   <textarea placeholder="Your Message" rows="5" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required></textarea>
                 </div>
-                <button type="submit" className="btn-primary w-full" disabled={sending}>
+                <SpecularButton
+                  type="submit"
+                  size="lg"
+                  radius={14}
+                  tint="var(--gold)"
+                  tintOpacity={1}
+                  textColor="var(--nav-btn-active-color)"
+                  lineColor="#ffffff"
+                  baseColor="var(--gold)"
+                  intensity={1.3}
+                  proximity={200}
+                  followMouse
+                  disabled={sending}
+                  className="btn-primary w-full"
+                  style={{ width: '100%', fontWeight: 700 }}
+                >
                   {sending ? 'Sending...' : sent ? '✓ Message Sent!' : 'Send Message'}
-                </button>
+                </SpecularButton>
                 <p style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'center', marginTop: '8px' }}>Secure contact form via EmailJS.</p>
               </form>
             </div>
@@ -705,16 +868,49 @@ export default function Portfolio() {
         </div>
       </footer>
 
+      {/* MINIMAL FLOATING THEME TOGGLE (TOP-RIGHT ONLY) */}
+      <SpecularButton
+        className={`floating-theme-toggle${showNav ? ' is-visible' : ''}`}
+        onClick={toggleTheme}
+        size="sm"
+        radius={100}
+        tint="var(--nav-bg)"
+        tintOpacity={1}
+        textColor="var(--text)"
+        lineColor="var(--gold-light)"
+        baseColor="var(--nav-border)"
+        intensity={1.2}
+        proximity={120}
+        followMouse
+        aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+        title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+      >
+        <span className="theme-toggle-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
+      </SpecularButton>
+
       {/* NAV */}
-      <nav className={`nav-bar${showNav ? ' nav-visible' : ''}`}>
+      <nav className={`nav-bar${showNav ? ' nav-visible' : ''}`} aria-label="Main navigation">
         {SECTIONS.map(({ id, label, icon }) => (
-          <button
+          <SpecularButton
             key={id}
+            size="sm"
+            radius={100}
+            tint={activeSection === id ? 'var(--gold)' : 'transparent'}
+            tintOpacity={activeSection === id ? 1 : 0}
+            textColor={activeSection === id ? 'var(--nav-btn-active-color)' : 'var(--text-muted)'}
+            lineColor="var(--gold-light)"
+            baseColor={activeSection === id ? 'var(--gold)' : 'rgba(255, 255, 255, 0.12)'}
+            intensity={activeSection === id ? 1.4 : 0.8}
+            proximity={120}
+            followMouse
             className={`nav-btn ${activeSection === id ? 'active' : ''}`}
             onClick={() => handleNav(id)}
+            title={label}
+            aria-label={label}
           >
-            <span>{icon}</span><span>{label}</span>
-          </button>
+            <span className="nav-btn-icon">{icon}</span>
+            <span className="nav-btn-label">{label}</span>
+          </SpecularButton>
         ))}
       </nav>
     </>
