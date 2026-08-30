@@ -107,6 +107,27 @@ export default function Portfolio() {
 
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const [isServiceHovered, setIsServiceHovered] = useState(false);
+  const touchStartX = useRef(null);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    setIsServiceHovered(true);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX.current - touchEndX;
+    if (Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        setCurrentServiceIndex((prev) => (prev + 1) % SERVICES_DATA.length);
+      } else {
+        setCurrentServiceIndex((prev) => (prev - 1 + SERVICES_DATA.length) % SERVICES_DATA.length);
+      }
+    }
+    touchStartX.current = null;
+    setIsServiceHovered(false);
+  };
 
   useEffect(() => {
     if (isServiceHovered) return;
@@ -390,6 +411,8 @@ export default function Portfolio() {
             className="service-slider-container"
             onMouseEnter={() => setIsServiceHovered(true)}
             onMouseLeave={() => setIsServiceHovered(false)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
             <div
               className="service-slider-track"
@@ -424,7 +447,7 @@ export default function Portfolio() {
             </div>
           </div>
 
-          <div style={{ height: '120px', marginTop: '60px', position: 'relative', overflow: 'hidden', width: '100vw', left: '50%', transform: 'translateX(-50%)' }}>
+          <div style={{ height: '120px', marginTop: '60px', position: 'relative', overflow: 'hidden', width: '100%' }}>
             <LogoLoop
               logos={techLogos}
               speed={100}

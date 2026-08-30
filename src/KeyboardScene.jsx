@@ -38,6 +38,8 @@ export default function KeyboardScene() {
   const [completed, setCompleted] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  const lastWidthRef = useRef(typeof window !== 'undefined' ? window.innerWidth : 0);
+
   // Responsive DPR & Object-fit Cover Canvas Renderer
   const renderFrame = useCallback((frameIndex) => {
     const canvas = canvasRef.current;
@@ -60,13 +62,23 @@ export default function KeyboardScene() {
     ctx.save();
     ctx.scale(dpr, dpr);
 
-    // Object-fit: cover calculation
+    // Background fill to blend seamless framing
+    ctx.fillStyle = '#080b0f';
+    ctx.fillRect(0, 0, displayWidth, displayHeight);
+
+    // Object-fit calculation
     const imgRatio = img.naturalWidth / img.naturalHeight;
     const canvasRatio = displayWidth / displayHeight;
 
     let renderW, renderH, offX, offY;
 
-    if (canvasRatio > imgRatio) {
+    if (displayWidth < 768 && canvasRatio < imgRatio) {
+      // Mobile portrait optimized framing: prevent extreme side-cropping
+      renderW = Math.min(displayHeight * imgRatio, displayWidth * 1.35);
+      renderH = renderW / imgRatio;
+      offX = (displayWidth - renderW) / 2;
+      offY = (displayHeight - renderH) / 2;
+    } else if (canvasRatio > imgRatio) {
       renderW = displayWidth;
       renderH = displayWidth / imgRatio;
       offX = 0;
@@ -109,9 +121,14 @@ export default function KeyboardScene() {
     imagesRef.current = loadedImages;
   }, [renderFrame]);
 
-  // Window resize handler
+  // Window resize handler — check width change to ignore mobile URL bar height shifts
   useEffect(() => {
-    const handleResize = () => renderFrame(currentFrameRef.current);
+    const handleResize = () => {
+      if (Math.abs(window.innerWidth - lastWidthRef.current) > 5) {
+        lastWidthRef.current = window.innerWidth;
+        renderFrame(currentFrameRef.current);
+      }
+    };
     window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, [renderFrame]);
@@ -132,14 +149,14 @@ export default function KeyboardScene() {
     );
 
     const lenis = new Lenis({
-      duration: isTouchDevice ? 0.9 : 1.2,
+      duration: isTouchDevice ? 0.8 : 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.6,
-      syncTouch: true,
+      touchMultiplier: isTouchDevice ? 1.0 : 1.6,
+      syncTouch: !isTouchDevice,
     });
     window.__lenis = lenis;
 
@@ -156,6 +173,8 @@ export default function KeyboardScene() {
 
     const trigger = ScrollTrigger.create({
       trigger: outerEl,
+      pin: outerEl.querySelector('.ks-sticky') || true,
+      pinSpacing: false,
       start: 'top top',
       end: 'bottom bottom',
       scrub: isTouchDevice ? 0.15 : 0.4,
