@@ -246,7 +246,7 @@ export default function Portfolio() {
                   Available for freelance & internships
                 </div>
                 <a
-                  href="https://drive.google.com/file/d/1dpzh3uJmrf1zaOSKVrzfgSyUknuHWB85/view?usp=sharing"
+                  href="https://drive.google.com/file/d/17ScvTSHriNt65bY22hFPgUPveYowVZVC/view?usp=sharing"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="resume-btn"
